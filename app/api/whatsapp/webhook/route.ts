@@ -65,8 +65,8 @@ async function handleIncomingMessage(message: any, metadata: any) {
   try {
     await connectDB();
 
-    const contactPhone = message.from;
-    const messageText = message.text?.body || '';
+    const contactPhone = extractContactPhone(message, metadata);
+    const messageText = extractMessageText(message);
     const messageId = message.id;
     const timestamp = new Date(parseInt(message.timestamp) * 1000);
 
@@ -203,6 +203,45 @@ Response:`;
   } catch (error: any) {
     console.error('Error handling incoming message:', error);
   }
+}
+
+function extractContactPhone(message: any, metadata: any): string {
+  const directFrom = message?.from;
+  if (directFrom) {
+    return directFrom;
+  }
+
+  const fromUserId = message?.from_user_id;
+  if (fromUserId) {
+    return fromUserId;
+  }
+
+  const contacts = metadata?.contacts || [];
+  for (const contact of contacts) {
+    const waId = contact?.wa_id;
+    if (waId) {
+      return waId;
+    }
+
+    const phone = contact?.phones?.[0]?.wa_id || contact?.phones?.[0]?.phone;
+    if (phone) {
+      return phone;
+    }
+  }
+
+  return metadata?.metadata?.phone_number_id || 'unknown';
+}
+
+function extractMessageText(message: any): string {
+  if (message?.text?.body) {
+    return message.text.body;
+  }
+
+  if (message?.type === 'contacts' && Array.isArray(message.contacts)) {
+    return 'Contact card received';
+  }
+
+  return '';
 }
 
 async function handleStatusUpdate(status: any) {
