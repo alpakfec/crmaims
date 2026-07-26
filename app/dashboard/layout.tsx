@@ -2,7 +2,7 @@
 
 import { SessionProvider, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 
@@ -21,8 +21,13 @@ function DashboardLayoutContent({ children }: { children: ReactNode }) {
     );
   }
 
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login');
+    }
+  }, [router, status]);
+
   if (!session) {
-    router.push('/login');
     return null;
   }
 
