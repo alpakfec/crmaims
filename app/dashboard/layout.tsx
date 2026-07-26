@@ -10,6 +10,12 @@ function DashboardLayoutContent({ children }: { children: ReactNode }) {
   const { data: session, status } = useSession();
   const router = useRouter();
 
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login');
+    }
+  }, [router, status]);
+
   if (status === 'loading') {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -20,12 +26,6 @@ function DashboardLayoutContent({ children }: { children: ReactNode }) {
       </div>
     );
   }
-
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
-    }
-  }, [router, status]);
 
   if (!session) {
     return null;
