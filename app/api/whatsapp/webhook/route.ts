@@ -66,6 +66,7 @@ async function handleIncomingMessage(message: any, metadata: any) {
     await connectDB();
 
     const contactPhone = extractContactPhone(message, metadata);
+    const contactName = extractContactName(message, metadata);
     const messageText = extractMessageText(message);
     const messageId = message.id;
     const timestamp = new Date(parseInt(message.timestamp) * 1000);
@@ -104,7 +105,7 @@ async function handleIncomingMessage(message: any, metadata: any) {
         // Create new lead from WhatsApp contact
         lead = await Lead.create({
           leadNumber: Math.floor(Math.random() * 100000),
-          name: `WhatsApp ${contactPhone}`,
+          name: contactName || `WhatsApp ${contactPhone}`,
           phone: contactPhone,
           source: 'whatsapp',
           pipelineStageId: stage._id,
@@ -230,6 +231,23 @@ function extractContactPhone(message: any, metadata: any): string {
   }
 
   return metadata?.metadata?.phone_number_id || 'unknown';
+}
+
+function extractContactName(message: any, metadata: any): string {
+  const contacts = metadata?.contacts || [];
+  for (const contact of contacts) {
+    const profileName = contact?.profile?.name;
+    if (profileName) {
+      return profileName;
+    }
+
+    const firstName = contact?.profile?.first_name;
+    if (firstName) {
+      return firstName;
+    }
+  }
+
+  return '';
 }
 
 function extractMessageText(message: any): string {
