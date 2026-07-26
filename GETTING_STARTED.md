@@ -25,7 +25,7 @@
    MONGODB_URI=mongodb://localhost:27017/crmaims
    
    # Option B: MongoDB Atlas (Recommended for Production)
-   MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/crmaims?retryWrites=true&w=majority
+   MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/crmaims?retryWrites=true&w=majority pleasde uipgrade to vercel
 
    # NextAuth Configuration
    NEXTAUTH_SECRET=your-secret-key-generate-with: $(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")
