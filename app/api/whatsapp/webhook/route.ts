@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectDB, Lead, WAConversation, WAMessage, Interaction } from '@/lib/db';
+import { connectDB, Lead, WAConversation, WAMessage, Interaction, Stage, User, DEFAULT_STAGES } from '@/lib/db';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import bcryptjs from 'bcryptjs';
 
 const WHATSAPP_VERIFY_TOKEN = process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN || 'test-verify-token';
 const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
@@ -78,6 +79,25 @@ async function handleIncomingMessage(message: any, metadata: any) {
     if (conversation) {
       lead = await Lead.findById(conversation.leadId);
     } else {
+      // Ensure required CRM defaults exist before creating a lead.
+      let stage = await Stage.findOne({ name: 'New Lead' });
+      if (!stage) {
+        stage = await Stage.create({ ...DEFAULT_STAGES[0], order: 1 });
+      }
+
+      let user = await User.findOne({ role: 'admin' });
+      if (!user) {
+        const hashedPassword = await bcryptjs.hash('admin@123', 10);
+        user = await User.create({
+          name: 'Admin',
+          email: 'admin@famnshine.com',
+          passwordHash: hashedPassword,
+          role: 'admin',
+          active: true,
+          phone: '+1234567890',
+        });
+      }
+
       // Find lead by phone number
       lead = await Lead.findOne({ phone: contactPhone });
       if (!lead) {
@@ -87,8 +107,8 @@ async function handleIncomingMessage(message: any, metadata: any) {
           name: `WhatsApp ${contactPhone}`,
           phone: contactPhone,
           source: 'whatsapp',
-          pipelineStageId: (await Lead.findOne({}))?.pipelineStageId,
-          assignedTo: (await Lead.findOne({}))?.assignedTo,
+          pipelineStageId: stage._id,
+          assignedTo: user._id,
           whatsappOptIn: true,
         });
       }
