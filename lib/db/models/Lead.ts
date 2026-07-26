@@ -36,10 +36,10 @@ const leadSchema = new Schema<ILead>(
       required: true,
     },
     campaignId: { type: Schema.Types.ObjectId, ref: 'Campaign' },
-    phone: { type: String, required: true, index: true },
+    phone: { type: String, required: true },
     altPhone: String,
     email: String,
-    city: { type: String, index: true },
+    city: { type: String },
     address: String,
     pipelineStageId: { type: Schema.Types.ObjectId, ref: 'Stage', required: true },
     status: {
@@ -69,9 +69,7 @@ const leadSchema = new Schema<ILead>(
 
 // Indexes for performance
 leadSchema.index({ assignedTo: 1, pipelineStageId: 1 });
-leadSchema.index({ phone: 1 });
-leadSchema.index({ city: 1 });
-leadSchema.index({ 'name': 'text' });
+leadSchema.index({ name: 'text' });
 
 export const Lead = mongoose.models.Lead || mongoose.model<ILead>('Lead', leadSchema);
 
