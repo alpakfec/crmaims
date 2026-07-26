@@ -31,7 +31,7 @@ export interface IWAMessage extends Document {
 const waConversationSchema = new Schema<IWAConversation>(
   {
     leadId: { type: Schema.Types.ObjectId, ref: 'Lead', required: true, index: true },
-    waPhoneId: { type: String, required: true },
+    waPhoneId: { type: String },
     waContactPhone: { type: String, required: true, index: true },
     status: {
       type: String,

@@ -115,7 +115,7 @@ async function handleIncomingMessage(message: any, metadata: any) {
 
       conversation = await WAConversation.create({
         leadId: lead._id,
-        waPhoneId: metadata.phone_number_id,
+        waPhoneId: metadata?.phone_number_id || contactPhone || 'unknown',
         waContactPhone: contactPhone,
         status: 'open',
       });
